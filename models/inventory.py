@@ -27,34 +27,31 @@ def demand_level_label(annual_demand: float, p33: float, p67: float) -> str:
 
 
 class InventoryCalculator:
-    def compute(
+    def _compute_core(
         self,
-        forecast: ForecastResult,
+        values: np.ndarray,
         params: InventoryParams,
+        sku_id: str,
+        sku_name: str,
     ) -> InventoryResult:
-        fc = forecast.values
-        demand_mean = float(np.mean(fc))
-        demand_std = float(np.std(fc))
+        """Core EOQ/SS/ROP logic — single source of truth for both entry points."""
+        demand_mean = float(np.mean(values))
+        demand_std = float(np.std(values))
         annual_demand = demand_mean * 12
         lead_time_months = params.lead_time_days / 30.0
-
-        eoq = np.sqrt(
-            (2 * annual_demand * params.order_cost) / params.holding_cost
-        )
-        safety_stock = (
-            params.service_level_z * demand_std * np.sqrt(lead_time_months)
-        )
+ 
+        eoq = np.sqrt((2 * annual_demand * params.order_cost) / params.holding_cost)
+        safety_stock = params.service_level_z * demand_std * np.sqrt(lead_time_months)
         rop = demand_mean * lead_time_months + safety_stock
         total_cost = (
             (annual_demand / eoq) * params.order_cost
             + (eoq / 2) * params.holding_cost
         )
-
-        cv = coefficient_of_variation(fc)
-
+        cv = coefficient_of_variation(values)
+ 
         return InventoryResult(
-            sku_id=forecast.sku_id,
-            sku_name=forecast.sku_name,
+            sku_id=sku_id,
+            sku_name=sku_name,
             annual_demand=round(annual_demand, 2),
             demand_mean_monthly=round(demand_mean, 2),
             demand_std_monthly=round(demand_std, 2),
@@ -65,3 +62,18 @@ class InventoryCalculator:
             total_cost=round(total_cost, 2),
             variability=variability_label(cv),
         )
+ 
+    def compute(self, forecast: ForecastResult, params: InventoryParams) -> InventoryResult:
+        """Entry point khi dùng ForecastResult trực tiếp (legacy / test)."""
+        return self._compute_core(forecast.values, params, forecast.sku_id, forecast.sku_name)
+ 
+    def compute_from_rows(
+        self,
+        forecast_rows: list[dict],
+        params: InventoryParams,
+        sku_id: str,
+        sku_name: str,
+    ) -> InventoryResult:
+        """Entry point dùng forecast_output rows làm input — single source of truth."""
+        values = np.array([r["forecast_demand"] for r in forecast_rows], dtype=float)
+        return self._compute_core(values, params, sku_id, sku_name)
