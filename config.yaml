@@ -1,0 +1,4 @@
+forecast_horizon: 12
+input_file: input_3rd.xlsx
+output_charts_dir: output_charts
+output_files_dir: output_files

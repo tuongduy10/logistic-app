@@ -1,8 +1,16 @@
 from dataclasses import dataclass, field
+import yaml
+import os
 
+# ===== LOAD YAML CONFIG =====
+CONFIG_PATH = os.path.join(os.path.dirname(__file__), "config.yaml")
 
-FORECAST_HORIZON = 12
-INPUT_FILE = "input_3rd.xlsx"
+with open(CONFIG_PATH, "r") as f:
+    _yaml_config = yaml.safe_load(f)
+
+# ===== DYNAMIC CONFIG FROM YAML =====
+FORECAST_HORIZON = _yaml_config.get("forecast_horizon", 12)
+INPUT_FILE = _yaml_config.get("input_file", "input_3rd.xlsx")
 OUTPUT_CHARTS_DIR = "output_charts"
 OUTPUT_FILES_DIR = "output_files"
 
