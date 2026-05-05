@@ -127,8 +127,3 @@ class ExcelExporter:
                 writer, sheet_name="inventory_output", index=False
             )
         print(f"✓ Excel saved: {output_path}")
-
-    def export_inventory(self, output_path: str, inventory_rows: list[dict]) -> None:
-        """Xuất inventory_output ra file riêng biệt."""
-        pd.DataFrame(inventory_rows).to_excel(output_path, index=False)
-        print(f"✓ Inventory output saved: {output_path}")
