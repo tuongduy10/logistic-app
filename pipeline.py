@@ -42,7 +42,8 @@ class LogisticPipeline:
         self._renderer = ChartRenderer(OUTPUT_CHARTS_DIR)
         self._exporter = ExcelExporter()
 
-    def run(self) -> None:
+    def run(self) -> str:
+        """Run the full pipeline and return the path of the exported Excel file."""
         sku_ids = self._sales_repo.sku_ids()
         print(f"[Pipeline] Processing {len(sku_ids)} SKUs...\n")
 
@@ -174,3 +175,4 @@ class LogisticPipeline:
         self._exporter.export(output_path, forecast_rows, eval_rows, inventory_rows)
 
         print(f"\n✓ Done!  Charts → ./{OUTPUT_CHARTS_DIR}/")
+        return output_path
