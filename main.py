@@ -14,6 +14,7 @@ warnings.filterwarnings("ignore")
 from pipeline import LogisticPipeline
 from models.inventory_from_forecast import InventoryFromForecastPipeline
 from models.demand_adjusters import MultiplicativeBuffer
+from direct_inventory_export import main as run_direct_inventory
 
 
 if __name__ == "__main__":
@@ -31,3 +32,6 @@ if __name__ == "__main__":
         demand_adjuster=MultiplicativeBuffer(factor=1.10),
         # inventory_params_file="adjusted_params_q4.xlsx",  # optional override
     ).run()
+
+    # chạy thêm sau khi pipeline xong
+    run_direct_inventory() 
